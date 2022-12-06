@@ -1,4 +1,5 @@
 require("dotenv").config()
+const corsConfig = require("./config/corsConfig")
 //Express
 const express = require("express")
 const app = express()
@@ -18,9 +19,9 @@ const sessionRoute = require("./routes/sessionRoute")
 const refreshRoute = require("./routes/refreshRoute")
 const adminRoute = require("./routes/adminRoute")
 
+app.use(cors(corsConfig))
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors())
 app.use(morgan)
 app.use(logger)
 app.use("/favicon.ico", express.static("images/favicon.ico"))

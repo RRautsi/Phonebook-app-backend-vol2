@@ -26,7 +26,7 @@ const handleLogin = async (req, res) => {
       .status(401)
       .json({ message: "Unauthorized. Wrong password." })
   } else {
-    const roles = Object.values(foundUser.roles)
+    const roles = Object.values(foundUser.roles).filter(role => role != undefined)
     const accessToken = jwt.sign(
       { UserInfo: {
         username: foundUser.username, 
@@ -49,7 +49,7 @@ const handleLogin = async (req, res) => {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     })
-    res.json({ accessToken })
+    res.json({ accessToken, roles })
   }
 }
 

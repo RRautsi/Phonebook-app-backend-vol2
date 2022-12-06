@@ -18,8 +18,12 @@ const editUser = (req, res) => {
   }
   userModel.findByIdAndUpdate({_id: id}, editedUser, (err) => {
     if(err) {
+      if(err.code === 11000) {
+        return res.status(409).json({message: "Username already in use."})
+      }
       return res.status(500).json({ message: "Internal Server Error. Failed to edit user. Reason", err})
     }
+
     return res.status(200).json({ message: "User updated succesfully!"})
   })
 }
