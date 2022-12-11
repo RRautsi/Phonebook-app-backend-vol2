@@ -12,6 +12,7 @@ const handleRefreshToken = async (req, res) => {
   const foundUser = await userModel
     .findOne({ refreshtoken: refreshToken })
     .exec()
+  const id = foundUser.id
 
   if (!foundUser) {
     return res.sendStatus(403) //Forbidden
@@ -21,18 +22,21 @@ const handleRefreshToken = async (req, res) => {
     if (err || foundUser.username !== decoded.username) {
       return res.sendStatus(403) //Forbidden
     }
-    const roles = Object.values(foundUser.roles)
+    const roles = Object.values(foundUser.roles).filter(
+      (role) => role != undefined
+    )
     const accessToken = jwt.sign(
       {
         UserInfo: {
           username: foundUser.username,
           roles: roles,
+          id: id
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "30s" }
+      { expiresIn: "5s" }
     )
-    res.json({ accessToken })
+    res.json({ name: foundUser.username, accessToken })
   })
 }
 

@@ -1,25 +1,26 @@
 const contactModel = require("../models/contact")
+const userModel = require("../models/user")
 
-const getContacts = (req, res) => {
-  contactModel.find((err, contacts) => {
-    if(err) {
-      return res.status(500).json({message: "Internal Server Error. Server did not get contacts from database."})
-    }
-    return res.status(200).json(contacts)
-  })
+const getContacts = async (req, res) => {
+  const user = await userModel.findOne({username: req.user})
+  const contacts = await contactModel.find()
+  const filteredContacts = contacts.filter(contact => contact.userId === user.id)
+  if(!filteredContacts) return res.status(204).json({message: "No contacts found"})
+  res.json(filteredContacts)
 }
 
 const addContact = (req, res) => {
-  const { name, number } = req.body
+  const { name, number, userId } = req.body
   const contact = new contactModel ({
     name: name,
-    number: number
+    number: number,
+    userId
   })
-  contact.save((err) => {
+  contact.save((err, result) => {
     if(err) {
       return res.status(500).json({ message: "Internal Server Error. Failed to create new contact. Reason", err})
     }
-    return res.status(201).json({ message: "New contact created!"})
+    return res.status(201).json({ result, message: "New contact created!"})
   })
 }
 
@@ -41,13 +42,13 @@ const editContact = (req, res) => {
     name: name,
     number:number
   }
-  contactModel.findOneAndUpdate({_id: id}, editedContact, (err) => {
+  contactModel.findOneAndUpdate({_id: id}, editedContact, {new: true}, (err, result) => {
     if(err) {
       return res.status(500).json({ message: "Internal Server Error. Failed to edit contact. Reason", err})
     }
-    return res.status(200).json({ message: "Contact updated succesfully!"})
-  })
-}
+    return res.status(200).json({ result, message: "Contact updated succesfully!" })
+  }
+)}
 
 module.exports = {
   getContacts,
